@@ -15,29 +15,32 @@
     <div class="bg-white shadow overflow-hidden sm:rounded-md">
       <ul role="list" class="divide-y divide-gray-200">
         <li v-for="workout in workouts" :key="workout.id">
-          <NuxtLink
-            :to="`/workouts/${workout.id}`"
-            class="block hover:bg-gray-50"
-          >
+          <div class="block hover:bg-gray-50">
             <div class="px-4 py-4 sm:px-6">
               <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-indigo-600 truncate">
-                  {{ formatDate(workout.date) }} のトレーニング
-                </p>
-                <div class="ml-2 flex-shrink-0 flex">
-                  <!-- Status labels could go here -->
+                <NuxtLink :to="`/workouts/${workout.id}`" class="flex-grow">
+                  <p class="text-sm font-medium text-indigo-600 truncate">
+                    {{ formatDate(workout.date) }} のトレーニング
+                  </p>
+                </NuxtLink>
+                <div class="ml-2 flex-shrink-0 flex items-center">
+                  <button
+                    @click.prevent="deleteWorkout(workout.id)"
+                    class="text-red-500 hover:text-red-700 text-sm border px-2 py-1 rounded"
+                  >
+                    削除
+                  </button>
                 </div>
               </div>
               <div class="mt-2 sm:flex sm:justify-between">
                 <div class="sm:flex">
                   <p class="flex items-center text-sm text-gray-500">
-                    <!-- Icon or summary info -->
                     {{ workout.note || "メモなし" }}
                   </p>
                 </div>
               </div>
             </div>
-          </NuxtLink>
+          </div>
         </li>
         <li
           v-if="workouts.length === 0"
@@ -72,12 +75,38 @@ const fetchWorkouts = async () => {
 };
 
 const createWorkout = async () => {
-  if (!user.value) return;
+  const {
+    data: { user: currentUser },
+    error: authError,
+  } = await client.auth.getUser();
+
+  if (authError || !currentUser) {
+    alert("ログインセッションが無効です。");
+    return;
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // Check existing
+  const { data: existing } = await client
+    .from("workouts")
+    .select("id")
+    .eq("user_id", currentUser.id)
+    .eq("date", today)
+    .single();
+
+  if (existing) {
+    if (confirm("本日のトレーニングは既に作成されています。開きますか？")) {
+      navigateTo(`/workouts/${existing.id}`);
+    }
+    return;
+  }
+
   const { data, error } = await client
     .from("workouts")
     .insert({
-      user_id: user.value.id,
-      date: new Date().toISOString().split("T")[0], // today YYYY-MM-DD
+      user_id: currentUser.id,
+      date: today,
     })
     .select()
     .single();
@@ -86,6 +115,17 @@ const createWorkout = async () => {
     alert("作成に失敗しました: " + error.message);
   } else if (data) {
     navigateTo(`/workouts/${data.id}`);
+  }
+};
+
+const deleteWorkout = async (id: string) => {
+  if (!confirm("本当に削除しますか？")) return;
+
+  const { error } = await client.from("workouts").delete().eq("id", id);
+  if (error) {
+    alert("削除エラー: " + error.message);
+  } else {
+    fetchWorkouts(); // refresh
   }
 };
 

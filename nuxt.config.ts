@@ -8,6 +8,13 @@ export default defineNuxtConfig({
       login: '/login',
       callback: '/confirm',
       exclude: ['/login'],
+    },
+    types: '~/types/database.ts'
+  },
+  runtimeConfig: {
+    public: {
+      devEmail: '',
+      devPassword: '',
     }
   }
 })

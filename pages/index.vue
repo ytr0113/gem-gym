@@ -166,13 +166,30 @@ const createWorkout = async () => {
     return;
   }
 
+  const today = new Date().toISOString().split("T")[0];
+
+  // Check existing
+  const { data: existing } = await client
+    .from("workouts")
+    .select("id")
+    .eq("user_id", currentUser.id)
+    .eq("date", today)
+    .single();
+
+  if (existing) {
+    if (confirm("本日のトレーニングは既に作成されています。再開しますか？")) {
+      navigateTo(`/workouts/${existing.id}`);
+    }
+    return;
+  }
+
   console.log("User ID:", currentUser.id);
 
   const { data, error } = await client
     .from("workouts")
     .insert({
       user_id: currentUser.id,
-      date: new Date().toISOString().split("T")[0],
+      date: today,
     })
     .select()
     .single();
