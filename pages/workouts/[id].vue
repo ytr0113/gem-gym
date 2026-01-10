@@ -136,7 +136,7 @@
               <!-- Add Set Form (Quick Add) -->
               <div class="px-4 py-3 bg-gray-50/50">
                 <form @submit.prevent="addSet(item.id)" class="grid grid-cols-12 gap-2 items-center">
-                  <div class="col-span-1 text-center text-[10px] font-bold text-gray-400">ADD</div>
+                  <div class="col-span-1 text-center text-[10px] font-bold text-gray-400">追加</div>
                   <div class="col-span-3 flex items-center space-x-1">
                     <input v-model.number="newSets[item.id].weight" type="number" step="0.5" placeholder="kg" class="block w-full min-w-0 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm text-center" required />
                     <button type="button" @click="newSets[item.id].weight = 0" class="flex-shrink-0 px-1.5 py-1.5 bg-white border border-gray-300 shadow-sm hover:bg-gray-50 rounded text-[10px] font-bold text-gray-600 transition-colors whitespace-nowrap">自重</button>
@@ -193,8 +193,8 @@
         </div>
       </div>
 
-      <!-- Sticky Add Exercise Button (Smaller) -->
-      <div class="fixed bottom-6 right-6 z-40">
+      <!-- Sticky Add Exercise Button (Adjusted for mobile nav) -->
+      <div class="fixed bottom-24 sm:bottom-6 right-6 z-40">
         <button
           @click="showExerciseSelector = true"
           type="button"

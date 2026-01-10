@@ -1,71 +1,67 @@
 <template>
-  <div class="space-y-4 sm:space-y-6">
-    <div class="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-      <div class="lg:grid lg:grid-cols-3 lg:gap-6">
-        <div class="lg:col-span-1">
-          <h3 class="text-xl sm:text-lg font-bold sm:font-medium leading-6 text-gray-900">
-            ようこそ！
-          </h3>
-          <p class="mt-1 text-sm text-gray-500">
-            毎日のトレーニングを記録して、理想の体を作りましょう。
-          </p>
-          <div class="mt-4 sm:mt-6">
-            <div class="bg-indigo-50 overflow-hidden rounded-xl border border-indigo-100/50">
-              <div class="px-4 py-5 sm:p-6">
-                <dt class="text-xs sm:text-sm font-medium text-indigo-600 sm:text-gray-500 uppercase tracking-wider">
-                  今週のワークアウト
-                </dt>
-                <dd class="mt-1 text-4xl sm:text-3xl font-black text-indigo-900">
-                  {{ weeklyCount }} <span class="text-sm font-normal">回</span>
-                </dd>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="mt-8 lg:mt-0 lg:col-span-2">
-          <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
-            ボリューム推移 (kg)
-          </h4>
-          <ClientOnly>
-            <VolumeChart :labels="volumeLabels" :data="volumeData" />
-            <template #fallback>
-              <div
-                class="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm italic"
-              >
-                グラフを読み込み中...
-              </div>
-            </template>
-          </ClientOnly>
-        </div>
+  <div class="space-y-4">
+    <!-- Header with Quick Action -->
+    <div class="flex items-center justify-between px-1 mb-2">
+      <div>
+        <h2 class="text-2xl font-black text-indigo-900 tracking-tight">ダッシュボード</h2>
+        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mt-1">目指せパーフェクトボディ！</p>
       </div>
+      <button
+        type="button"
+        @click="createWorkout()"
+        class="inline-flex items-center px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-200 active:scale-95 transition-all hover:bg-indigo-700"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+        </svg>
+        開始
+      </button>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="bg-white shadow rounded-lg sm:rounded-lg">
-      <div class="px-4 py-5 sm:p-6">
-        <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4 sm:mb-0">
-          クイックアクション
+    <!-- Stats & Calendar Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
+      <!-- Calendar Area -->
+      <div class="flex flex-col h-full space-y-2">
+        <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] px-1">
+          トレーニング記録
         </h3>
-        <div class="mt-2 sm:mt-5 flex flex-col sm:flex-row gap-3 sm:space-x-4">
-          <button
-            type="button"
-            @click="createWorkout"
-            class="flex-1 inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent shadow-sm text-sm font-bold sm:font-medium rounded-xl sm:rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transition-all active:scale-95"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            トレーニングを開始
-          </button>
-          <NuxtLink
-            to="/workouts"
-            class="flex-1 inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-gray-200 shadow-sm text-sm font-bold sm:font-medium rounded-xl sm:rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-100 transition-all active:scale-95 text-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            履歴を見る
-          </NuxtLink>
+        <WorkoutCalendar :workouts-by-date="workoutsByDate" @select-day="handleDateSelect" class="flex-grow" />
+      </div>
+
+      <!-- Weekly Stats Area -->
+      <div class="flex flex-col h-full space-y-2">
+        <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] px-1">
+          週間のパフォーマンス
+        </h3>
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex-grow flex flex-col">
+          <div class="flex items-end justify-between mb-2">
+            <div>
+              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">週間のトレーニング数</p>
+              <p class="text-4xl font-black text-indigo-900 leading-none">{{ weeklyCount }}<span class="text-sm font-normal ml-1">回</span></p>
+            </div>
+            <div 
+              class="px-3 py-1 rounded-full text-[10px] font-black uppercase transition-colors duration-500"
+              :class="weeklyMessage.color"
+            >
+              {{ weeklyMessage.text }}
+            </div>
+          </div>
+          
+          <div class="mt-4 flex-grow flex flex-col">
+            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+              ボリュームの推移
+            </h4>
+            <div class="flex-grow min-h-[160px]">
+              <ClientOnly>
+                <VolumeChart :labels="volumeLabels" :data="volumeData" />
+                <template #fallback>
+                  <div class="h-full bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 text-xs italic">
+                    読み込み中...
+                  </div>
+                </template>
+              </ClientOnly>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -75,6 +71,7 @@
 <script setup lang="ts">
 import type { Database } from "~/types/database";
 import VolumeChart from "~/components/charts/VolumeChart.vue";
+import WorkoutCalendar from "~/components/WorkoutCalendar.vue";
 
 const client = useSupabaseClient<Database>();
 const user = useSupabaseUser();
@@ -82,21 +79,34 @@ const user = useSupabaseUser();
 const weeklyCount = ref(0);
 const volumeLabels = ref<string[]>([]);
 const volumeData = ref<number[]>([]);
+const workoutsByDate = ref<Record<string, string>>({});
+const weeklyMessage = computed(() => {
+  if (weeklyCount.value === 0) return { text: '今週も頑張ろう！', color: 'bg-gray-50 text-gray-400' };
+  if (weeklyCount.value === 1) return { text: 'ナイス！いい感じ！', color: 'bg-indigo-50 text-indigo-600' };
+  if (weeklyCount.value <= 3) return { text: '仕上がってるよ！！', color: 'bg-green-50 text-green-600' };
+  return { text: 'パーフェクト！', color: 'bg-yellow-50 text-yellow-600' };
+});
 
 const fetchStats = async () => {
   if (!user.value) return;
 
-  // Get date 7 days ago
+  // Get date 7 days ago for chart
   const today = new Date();
   const sevenDaysAgo = new Date(today);
   sevenDaysAgo.setDate(today.getDate() - 6);
-  const dateStr = sevenDaysAgo.toISOString().split("T")[0];
+  const chartDateStr = sevenDaysAgo.toISOString().split("T")[0];
+
+  // Get date 60 days ago for calendar (buffer for month switching)
+  const sixtyDaysAgo = new Date(today);
+  sixtyDaysAgo.setDate(today.getDate() - 60);
+  const calendarDateStr = sixtyDaysAgo.toISOString().split("T")[0];
 
   try {
     const { data: workouts, error } = await client
       .from("workouts")
       .select(
         `
+                id,
                 date,
                 workout_items (
                     sets (
@@ -106,13 +116,21 @@ const fetchStats = async () => {
                 )
             `
       )
-      .gte("date", dateStr)
+      .gte("date", calendarDateStr)
       .order("date", { ascending: true });
 
     if (error) throw error;
 
-    // Process data
-    weeklyCount.value = workouts?.length || 0;
+    // 1. Populate calendar map
+    const map: Record<string, string> = {};
+    (workouts as any[])?.forEach(w => {
+      map[w.date] = w.id;
+    });
+    workoutsByDate.value = map;
+
+    // 2. Filter for weekly count and chart
+    const recentWorkouts = (workouts as any[])?.filter(w => w.date >= chartDateStr) || [];
+    weeklyCount.value = recentWorkouts.length;
 
     // Group volume by date
     const volMap: Record<string, number> = {};
@@ -128,13 +146,12 @@ const fetchStats = async () => {
       volumeLabels.value[i] = key; // ordered labels
     }
 
-    workouts?.forEach((w) => {
+    recentWorkouts.forEach((w) => {
       const dKey = new Date(w.date).toLocaleDateString("ja-JP", {
         month: "2-digit",
         day: "2-digit",
       });
       let dailyVol = 0;
-      // @ts-ignore: nested types can be tricky
       w.workout_items?.forEach((item: any) => {
         item.sets?.forEach((s: any) => {
           if (s.weight && s.reps) {
@@ -146,7 +163,6 @@ const fetchStats = async () => {
       if (volMap[dKey] !== undefined) {
         volMap[dKey] += dailyVol;
       } else {
-        // In case logic mismatches timezone slightly
         volMap[dKey] = dailyVol;
       }
     });
@@ -161,7 +177,18 @@ onMounted(() => {
   fetchStats();
 });
 
-const createWorkout = async () => {
+const handleDateSelect = async (dateStr: string) => {
+  const existingId = workoutsByDate.value[dateStr];
+  if (existingId) {
+    navigateTo(`/workouts/${existingId}`);
+  } else {
+    if (confirm(`${dateStr} のトレーニングを作成しますか？`)) {
+      await createWorkout(dateStr);
+    }
+  }
+};
+
+const createWorkout = async (targetDate?: string) => {
   const {
     data: { user: currentUser },
     error: authError,
@@ -172,30 +199,28 @@ const createWorkout = async () => {
     return;
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const date = targetDate || new Date().toISOString().split("T")[0];
 
-  // Check existing
+  // Check existing (extra safety)
   const { data: existing } = await client
     .from("workouts")
     .select("id")
     .eq("user_id", currentUser.id)
-    .eq("date", today)
+    .eq("date", date)
     .single();
 
   if (existing) {
-    if (confirm("本日のトレーニングは既に作成されています。再開しますか？")) {
+    if (confirm(`${date} のトレーニングは既に作成されています。再開しますか？`)) {
       navigateTo(`/workouts/${existing.id}`);
     }
     return;
   }
 
-  console.log("User ID:", currentUser.id);
-
   const { data, error } = await client
     .from("workouts")
     .insert({
       user_id: currentUser.id,
-      date: today,
+      date: date,
     })
     .select()
     .single();

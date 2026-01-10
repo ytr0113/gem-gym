@@ -1,5 +1,5 @@
 <template>
-  <div class="h-64 cursor-default">
+  <div class="cursor-default h-full w-full min-h-[200px]">
     <Bar :data="chartData" :options="chartOptions" />
   </div>
 </template>
@@ -34,7 +34,7 @@ const chartData = computed(() => ({
   labels: props.labels,
   datasets: [
     {
-      label: "Volume (kg)",
+      label: "ボリューム (kg)",
       backgroundColor: "#4f46e5",
       data: props.data,
     },
