@@ -58,10 +58,15 @@
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
       <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6">期間内ボリューム比率</h3>
       <div class="space-y-4">
-        <div v-for="muscle in periodMuscleDistribution" :key="muscle.name">
+        <NuxtLink 
+          v-for="muscle in periodMuscleDistribution" 
+          :key="muscle.name"
+          :to="`/stats/${muscle.slug}`"
+          class="block group cursor-pointer"
+        >
           <div class="flex justify-between items-center mb-1">
-            <span class="text-sm font-bold text-gray-700">{{ muscle.name }}</span>
-            <span class="text-xs font-bold text-gray-400">{{ formatVolume(muscle.volume) }} kg ({{ muscle.percentage }}%)</span>
+            <span class="text-sm font-bold text-gray-700 group-hover:text-indigo-600 transition-colors">{{ muscle.name }}</span>
+            <span class="text-xs font-bold text-gray-400 group-hover:text-gray-600 transition-colors">{{ formatVolume(muscle.volume) }} kg ({{ muscle.percentage }}%)</span>
           </div>
           <div class="w-full bg-gray-100 rounded-full h-2">
             <div 
@@ -69,7 +74,7 @@
               :style="{ width: muscle.percentage + '%', backgroundColor: muscle.color }"
             ></div>
           </div>
-        </div>
+        </NuxtLink>
         <div v-if="periodMuscleDistribution.length === 0" class="text-center py-8 text-gray-300 text-sm italic">
           記録がありません
         </div>
@@ -93,6 +98,16 @@ const MUSCLE_COLORS: Record<string, string> = {
   '脚': '#10b981',
   '下半身': '#10b981',
   'その他': '#94a3b8'
+};
+
+const MUSCLE_SLUGS: Record<string, string> = {
+  '胸': 'chest',
+  '背中': 'back',
+  '肩': 'shoulders',
+  '腕': 'arms',
+  '脚': 'legs',
+  '下半身': 'legs',
+  'その他': 'other'
 };
 
 const periods = [
@@ -155,6 +170,7 @@ const periodMuscleDistribution = computed(() => {
   const muscles = Object.keys(muscleVolMap).sort((a, b) => muscleVolMap[b] - muscleVolMap[a]);
   return muscles.map(name => ({
     name,
+    slug: MUSCLE_SLUGS[name] || name, // Fallback to name if no slug
     volume: muscleVolMap[name],
     percentage: total > 0 ? Math.round((muscleVolMap[name] / total) * 100) : 0,
     color: MUSCLE_COLORS[name] || MUSCLE_COLORS['その他']
