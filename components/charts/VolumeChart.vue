@@ -1,5 +1,5 @@
 <template>
-  <div class="cursor-default h-full w-full min-h-[200px]">
+  <div class="cursor-default h-full w-full min-h-[160px]">
     <Bar :data="chartData" :options="chartOptions" />
   </div>
 </template>
@@ -27,26 +27,40 @@ ChartJS.register(
 
 const props = defineProps<{
   labels: string[];
-  data: number[];
+  datasets: {
+    label: string;
+    data: number[];
+    backgroundColor: string;
+  }[];
 }>();
 
 const chartData = computed(() => ({
   labels: props.labels,
-  datasets: [
-    {
-      label: "ボリューム (kg)",
-      backgroundColor: "#4f46e5",
-      data: props.data,
-    },
-  ],
+  datasets: props.datasets,
 }));
 
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  scales: {
+    x: {
+      stacked: true,
+      grid: {
+        display: false,
+      },
+    },
+    y: {
+      stacked: true,
+      beginAtZero: true,
+    },
+  },
   plugins: {
     legend: {
       display: false,
+    },
+    tooltip: {
+      mode: 'index',
+      intersect: false,
     },
   },
 };

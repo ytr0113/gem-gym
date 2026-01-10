@@ -53,7 +53,7 @@
             </h4>
             <div class="flex-grow min-h-[160px]">
               <ClientOnly>
-                <VolumeChart :labels="volumeLabels" :data="volumeData" />
+                <VolumeChart :labels="volumeLabels" :datasets="volumeDatasets" />
                 <template #fallback>
                   <div class="h-full bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 text-xs italic">
                     読み込み中...
@@ -78,7 +78,7 @@ const user = useSupabaseUser();
 
 const weeklyCount = ref(0);
 const volumeLabels = ref<string[]>([]);
-const volumeData = ref<number[]>([]);
+const volumeDatasets = ref<{ label: string; data: number[]; backgroundColor: string }[]>([]);
 const workoutsByDate = ref<Record<string, string>>({});
 const weeklyMessage = computed(() => {
   if (weeklyCount.value === 0) return { text: '今週も頑張ろう！', color: 'bg-gray-50 text-gray-400' };
@@ -106,15 +106,18 @@ const fetchStats = async () => {
       .from("workouts")
       .select(
         `
-                id,
-                date,
-                workout_items (
-                    sets (
-                        weight,
-                        reps
-                    )
-                )
-            `
+        id,
+        date,
+        workout_items (
+          exercise:exercises (
+            target_muscle
+          ),
+          sets (
+            weight,
+            reps
+          )
+        )
+      `
       )
       .gte("date", calendarDateStr)
       .order("date", { ascending: true });
@@ -132,42 +135,61 @@ const fetchStats = async () => {
     const recentWorkouts = (workouts as any[])?.filter(w => w.date >= chartDateStr) || [];
     weeklyCount.value = recentWorkouts.length;
 
-    // Group volume by date
-    const volMap: Record<string, number> = {};
-    // Initialize last 7 days with 0
+    // 3. Aggregate volume by date AND muscle group
+    const MUSCLE_COLORS: Record<string, string> = {
+      '胸': '#ef4444',
+      '背中': '#3b82f6',
+      '肩': '#f59e0b',
+      '腕': '#8b5cf6',
+      '脚': '#10b981',
+      'その他': '#94a3b8'
+    };
+
+    // Initialize labels for the last 7 days
+    volumeLabels.value = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(sevenDaysAgo);
       d.setDate(d.getDate() + i);
-      const key = d.toLocaleDateString("ja-JP", {
+      volumeLabels.value.push(d.toLocaleDateString("ja-JP", {
         month: "2-digit",
         day: "2-digit",
-      });
-      volMap[key] = 0;
-      volumeLabels.value[i] = key; // ordered labels
+      }));
     }
+
+    const muscleDataMap: Record<string, Record<string, number>> = {};
+    const muscles = new Set<string>();
 
     recentWorkouts.forEach((w) => {
       const dKey = new Date(w.date).toLocaleDateString("ja-JP", {
         month: "2-digit",
         day: "2-digit",
       });
-      let dailyVol = 0;
+
       w.workout_items?.forEach((item: any) => {
+        const muscle = item.exercise?.target_muscle || 'その他';
+        muscles.add(muscle);
+
+        if (!muscleDataMap[muscle]) {
+          muscleDataMap[muscle] = {};
+        }
+        if (!muscleDataMap[muscle][dKey]) {
+          muscleDataMap[muscle][dKey] = 0;
+        }
+
         item.sets?.forEach((s: any) => {
           if (s.weight && s.reps) {
-            dailyVol += s.weight * s.reps;
+            muscleDataMap[muscle][dKey] += s.weight * s.reps;
           }
         });
       });
-      // Accumulate if multiple workouts per day
-      if (volMap[dKey] !== undefined) {
-        volMap[dKey] += dailyVol;
-      } else {
-        volMap[dKey] = dailyVol;
-      }
     });
 
-    volumeData.value = volumeLabels.value.map((l) => volMap[l] || 0);
+    // Prepare datasets for chart
+    volumeDatasets.value = Array.from(muscles).map(muscle => ({
+      label: muscle,
+      backgroundColor: MUSCLE_COLORS[muscle] || MUSCLE_COLORS['その他'],
+      data: volumeLabels.value.map(label => muscleDataMap[muscle]?.[label] || 0)
+    }));
   } catch (e) {
     console.error("Stats error:", e);
   }

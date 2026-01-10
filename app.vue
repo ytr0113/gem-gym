@@ -26,6 +26,13 @@
               >
                 トレーニング履歴
               </NuxtLink>
+              <NuxtLink
+                to="/stats"
+                class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                active-class="border-indigo-500 text-gray-900 font-bold"
+              >
+                分析
+              </NuxtLink>
             </div>
           </div>
           <div class="flex items-center">
@@ -66,8 +73,8 @@
         <span class="text-[10px] font-bold">履歴</span>
       </NuxtLink>
 
-      <NuxtLink to="/stats" class="flex flex-col items-center space-y-1 p-2 transition-all active:scale-90 text-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 fill-none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <NuxtLink to="/stats" class="flex flex-col items-center space-y-1 p-2 transition-all active:scale-90" active-class="text-indigo-600">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" :class="$route.path === '/stats' ? 'fill-indigo-600' : 'fill-none'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
         <span class="text-[10px] font-bold">分析</span>
