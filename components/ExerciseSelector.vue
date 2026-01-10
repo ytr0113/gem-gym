@@ -6,10 +6,10 @@
     aria-modal="true"
   >
     <div
-      class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+      class="flex items-center sm:items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
     >
       <div
-        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        class="fixed inset-0 bg-gray-600 bg-opacity-75 backdrop-blur-sm transition-opacity"
         aria-hidden="true"
         @click="$emit('close')"
       ></div>
@@ -21,7 +21,7 @@
       >
 
       <div
-        class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
+        class="inline-block align-middle bg-white rounded-2xl px-4 pt-5 pb-4 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
       >
         <div>
           <h3
@@ -51,7 +51,7 @@
             </button>
           </div>
 
-          <div class="mt-4 max-h-96 overflow-y-auto" ref="scrollContainer">
+          <div class="mt-4 max-h-[60vh] sm:max-h-96 overflow-y-auto" ref="scrollContainer">
             <!-- Search Results -->
             <div v-if="searchQuery">
                 <ul class="divide-y divide-gray-200">

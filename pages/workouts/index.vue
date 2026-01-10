@@ -12,31 +12,32 @@
       </button>
     </div>
 
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-      <ul role="list" class="divide-y divide-gray-200">
+    <div class="bg-white shadow overflow-hidden rounded-xl">
+      <ul role="list" class="divide-y divide-gray-100">
         <li v-for="workout in workouts" :key="workout.id">
-          <div class="block hover:bg-gray-50">
-            <div class="px-4 py-4 sm:px-6">
-              <div class="flex items-center justify-between">
-                <NuxtLink :to="`/workouts/${workout.id}`" class="flex-grow">
-                  <p class="text-sm font-medium text-indigo-600 truncate">
-                    {{ formatDate(workout.date) }} のトレーニング
-                  </p>
+          <div class="block hover:bg-gray-50 transition-colors">
+            <div class="px-4 py-5 sm:px-6">
+              <div class="flex items-start justify-between">
+                <NuxtLink :to="`/workouts/${workout.id}`" class="flex-grow group">
+                  <div class="flex flex-col">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{{ formatDate(workout.date, true) }}</span>
+                    <p class="text-lg font-black text-gray-900 group-hover:text-indigo-600 transition-colors">
+                      {{ formatDate(workout.date) }} 
+                    </p>
+                  </div>
+                  <div class="mt-2 text-sm text-gray-500 line-clamp-1 italic">
+                    {{ workout.note || "メモなし" }}
+                  </div>
                 </NuxtLink>
-                <div class="ml-2 flex-shrink-0 flex items-center">
+                <div class="ml-4 flex-shrink-0">
                   <button
                     @click.prevent="deleteWorkout(workout.id)"
-                    class="text-red-500 hover:text-red-700 text-sm border px-2 py-1 rounded"
+                    class="p-2 text-gray-300 hover:text-red-500 transition-colors"
                   >
-                    削除
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   </button>
-                </div>
-              </div>
-              <div class="mt-2 sm:flex sm:justify-between">
-                <div class="sm:flex">
-                  <p class="flex items-center text-sm text-gray-500">
-                    {{ workout.note || "メモなし" }}
-                  </p>
                 </div>
               </div>
             </div>
@@ -129,9 +130,16 @@ const deleteWorkout = async (id: string) => {
   }
 };
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("ja-JP", {
-    year: "numeric",
+const formatDate = (dateString: string, brief = false) => {
+  const date = new Date(dateString);
+  if (brief) {
+    return date.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  }
+  return date.toLocaleDateString("ja-JP", {
     month: "long",
     day: "numeric",
     weekday: "short",

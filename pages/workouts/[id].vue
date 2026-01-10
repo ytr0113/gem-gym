@@ -53,10 +53,10 @@
           <div class="border-t border-gray-100">
             <div class="sm:divide-y sm:divide-gray-200">
               <!-- Sets Header -->
-              <div class="grid grid-cols-12 gap-2 px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">
-                <div class="col-span-1">SET</div>
-                <div class="col-span-3">重量 (kg)</div>
-                <div class="col-span-3">レップ数</div>
+              <div class="grid grid-cols-12 gap-2 px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center items-center">
+                <div class="col-span-1">#</div>
+                <div class="col-span-3">重量 <span class="hidden sm:inline">(kg)</span></div>
+                <div class="col-span-3">レップ<span class="hidden sm:inline">数</span></div>
                 <div class="col-span-3">RPE</div>
                 <div class="col-span-2">操作</div>
               </div>

@@ -1,38 +1,38 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4 sm:space-y-6">
     <div class="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-      <div class="md:grid md:grid-cols-3 md:gap-6">
-        <div class="md:col-span-1">
-          <h3 class="text-lg font-medium leading-6 text-gray-900">
+      <div class="lg:grid lg:grid-cols-3 lg:gap-6">
+        <div class="lg:col-span-1">
+          <h3 class="text-xl sm:text-lg font-bold sm:font-medium leading-6 text-gray-900">
             ようこそ！
           </h3>
           <p class="mt-1 text-sm text-gray-500">
             毎日のトレーニングを記録して、理想の体を作りましょう。
           </p>
-          <div class="mt-6">
-            <div class="bg-indigo-50 overflow-hidden rounded-lg">
+          <div class="mt-4 sm:mt-6">
+            <div class="bg-indigo-50 overflow-hidden rounded-xl border border-indigo-100/50">
               <div class="px-4 py-5 sm:p-6">
-                <dt class="text-sm font-medium text-gray-500 truncate">
+                <dt class="text-xs sm:text-sm font-medium text-indigo-600 sm:text-gray-500 uppercase tracking-wider">
                   今週のワークアウト
                 </dt>
-                <dd class="mt-1 text-3xl font-semibold text-indigo-900">
-                  {{ weeklyCount }} 回
+                <dd class="mt-1 text-4xl sm:text-3xl font-black text-indigo-900">
+                  {{ weeklyCount }} <span class="text-sm font-normal">回</span>
                 </dd>
               </div>
             </div>
           </div>
         </div>
-        <div class="mt-5 md:mt-0 md:col-span-2">
-          <h4 class="text-sm font-medium text-gray-500 mb-2">
-            直近のボリューム推移 (kg)
+        <div class="mt-8 lg:mt-0 lg:col-span-2">
+          <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+            ボリューム推移 (kg)
           </h4>
           <ClientOnly>
             <VolumeChart :labels="volumeLabels" :data="volumeData" />
             <template #fallback>
               <div
-                class="h-64 bg-gray-100 flex items-center justify-center text-gray-400"
+                class="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm italic"
               >
-                Loading Chart...
+                グラフを読み込み中...
               </div>
             </template>
           </ClientOnly>
@@ -41,23 +41,29 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="bg-white shadow sm:rounded-lg">
+    <div class="bg-white shadow rounded-lg sm:rounded-lg">
       <div class="px-4 py-5 sm:p-6">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">
+        <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4 sm:mb-0">
           クイックアクション
         </h3>
-        <div class="mt-5 flex space-x-4">
+        <div class="mt-2 sm:mt-5 flex flex-col sm:flex-row gap-3 sm:space-x-4">
           <button
             type="button"
             @click="createWorkout"
-            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            class="flex-1 inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent shadow-sm text-sm font-bold sm:font-medium rounded-xl sm:rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transition-all active:scale-95"
           >
-            トレーニングを開始する
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            トレーニングを開始
           </button>
           <NuxtLink
             to="/workouts"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            class="flex-1 inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-gray-200 shadow-sm text-sm font-bold sm:font-medium rounded-xl sm:rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-100 transition-all active:scale-95 text-center"
           >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             履歴を見る
           </NuxtLink>
         </div>
