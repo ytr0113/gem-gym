@@ -3,7 +3,7 @@
     <div v-if="loading" class="text-center py-10">読み込み中...</div>
     <div v-else-if="!workout">ワークアウトが見つかりません。</div>
     <div v-else class="space-y-6 pb-24">
-      <!-- Header -->
+      <!-- ヘッダー -->
       <div class="bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
         <div class="md:flex md:items-center md:justify-between">
           <div class="min-w-0 flex-1">
@@ -23,7 +23,7 @@
         </div>
       </div>
 
-      <!-- Workout Items -->
+      <!-- ワークアウト種目一覧 -->
       <div class="space-y-6" ref="itemsContainer">
         <div
           v-for="item in workoutItems"
@@ -67,7 +67,7 @@
                 :key="set.id"
                 class="grid grid-cols-12 gap-2 px-4 py-3 items-center text-center border-t border-gray-50"
               >
-                <!-- Read Mode -->
+                <!-- 閲覧モード -->
                 <template v-if="editingSetId !== set.id">
                   <div class="col-span-1 text-sm font-medium text-gray-500">{{ index + 1 }}</div>
                   <div class="col-span-3 text-sm text-gray-900 font-semibold whitespace-nowrap">
@@ -99,7 +99,7 @@
                   </div>
                 </template>
 
-                <!-- Edit Mode -->
+                <!-- 編集モード -->
                 <template v-else>
                   <div class="col-span-1 text-xs text-gray-500">{{ index + 1 }}</div>
                   <div class="col-span-3 flex items-center space-x-1">
@@ -193,7 +193,7 @@
         </div>
       </div>
 
-      <!-- Sticky Add Exercise Button (Adjusted for mobile nav) -->
+      <!-- 種目追加ボタン（画面下部に固定） -->
       <div class="fixed bottom-24 sm:bottom-6 right-6 z-40">
         <button
           @click="showExerciseSelector = true"
@@ -234,17 +234,17 @@ const sets = ref<Database["public"]["Tables"]["sets"]["Row"][]>([]);
 const showExerciseSelector = ref(false);
 const itemsContainer = ref<HTMLElement | null>(null);
 
-// Local state for new sets: itemId -> { weight, reps, rpe }
+// 新しいセット用のローカル状態: itemId -> { weight, reps, rpe }
 const newSets = ref<Record<string, { weight: number | null; reps: number | null; rpe: number | null }>>({});
 
-// Editing state
+// 編集状態
 const editingSetId = ref<string | null>(null);
 const editingSetData = ref<{ weight: number; reps: number; rpe: number | null; }>({ weight: 0, reps: 0, rpe: null });
 
 const fetchWorkoutData = async () => {
   loading.value = true;
   try {
-    // Fetch Workout
+    // ワークアウトを取得
     const { data: wData, error: wError } = await client
       .from("workouts")
       .select("*")
@@ -253,7 +253,7 @@ const fetchWorkoutData = async () => {
     if (wError) throw wError;
     workout.value = wData;
 
-    // Fetch Items
+    // 種目を取得
     const { data: iData, error: iError } = await client
       .from("workout_items")
       .select("*")
@@ -262,14 +262,14 @@ const fetchWorkoutData = async () => {
     if (iError) throw iError;
     workoutItems.value = iData || [];
 
-    // Initialize newSets state
+    // newSets の状態を初期化
     workoutItems.value.forEach((item) => {
       if (!(item.id in newSets.value)) {
         newSets.value[item.id] = { weight: null, reps: null, rpe: null };
       }
     });
 
-    // Fetch Sets
+    // セットを取得
     if (workoutItems.value.length > 0) {
       const itemIds = workoutItems.value.map((i) => i.id);
       const { data: sData, error: sError } = await client
@@ -283,7 +283,7 @@ const fetchWorkoutData = async () => {
       sets.value = [];
     }
 
-    // Fetch Exercise Info
+    // 種目情報を取得
     const exerciseIds = [...new Set(workoutItems.value.map((i) => i.exercise_id))];
     if (exerciseIds.length > 0) {
       const { data: eData, error: eError } = await client
@@ -323,13 +323,13 @@ const addExercise = async (exercise: Database["public"]["Tables"]["exercises"]["
   if (error) {
     alert("追加エラー: " + error.message);
   } else if (data) {
-    // Update local state
+    // ローカル状態を更新
     const newItem = data as Database["public"]["Tables"]["workout_items"]["Row"];
     workoutItems.value.push(newItem);
     exercisesCache.value[exercise.id] = { name: exercise.name, muscle: exercise.target_muscle };
     newSets.value[newItem.id] = { weight: null, reps: null, rpe: null };
     
-    // Auto scroll to bottom
+    // 自動で一番下までスクロール
     nextTick(() => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
@@ -380,7 +380,7 @@ const addSet = async (itemId: string) => {
     alert("セット記録エラー: " + error.message);
   } else if (data) {
     sets.value.push(data);
-    // Keep values for NEXT set auto-fill
+    // 次のセットの入力補助のために値を保持
     newSets.value[itemId] = { weight: input.weight, reps: input.reps, rpe: input.rpe };
   }
 };

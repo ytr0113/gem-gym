@@ -1,6 +1,6 @@
 <template>
   <div v-if="user" class="space-y-6">
-    <!-- Header -->
+    <!-- ヘッダー -->
     <div class="flex items-center justify-between">
       <div>
         <h2 class="text-2xl font-black text-indigo-900 tracking-tight">身体データ記録</h2>
@@ -18,7 +18,7 @@
       </button>
     </div>
 
-    <!-- Period Selector (Repositioned below header) -->
+    <!-- 期間選択（ヘッダーの下に配置） -->
     <div class="flex justify-end">
       <div class="inline-flex p-1 bg-gray-100 rounded-xl">
         <button 
@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <!-- Goal & Progress Info -->
+    <!-- 目標と進捗状況 -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
         <div class="space-y-1">
@@ -73,7 +73,7 @@
       </div>
     </div>
 
-    <!-- Stats Chart -->
+    <!-- 推移グラフ -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
       <div class="flex items-center justify-between mb-6">
         <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">推移グラフ</h3>
@@ -98,7 +98,7 @@
       </div>
     </div>
 
-    <!-- History List -->
+    <!-- 履歴リスト -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center">
         <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">過去の記録</h3>
@@ -133,7 +133,7 @@
       </div>
     </div>
 
-    <!-- Record Modal -->
+    <!-- 記録入力モーダル -->
     <div v-if="showRecordModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-indigo-950/40 backdrop-blur-sm" @click="showRecordModal = false"></div>
       <div class="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -210,6 +210,8 @@ import BodyChart from "~/components/charts/BodyChart.vue";
 const client = useSupabaseClient<Database>();
 const user = useSupabaseUser();
 
+const { getTodayJST } = useDate();
+
 const loading = ref(true);
 const saving = ref(false);
 const showRecordModal = ref(false);
@@ -217,7 +219,7 @@ const profile = ref<Database["public"]["Tables"]["user_profiles"]["Row"] | null>
 const history = ref<Database["public"]["Tables"]["body_metrics"]["Row"][]>([]);
 
 const form = ref({
-  date: new Date().toISOString().split('T')[0],
+  date: getTodayJST(),
   weight: null as number | null,
   bodyFat: null as number | null,
 });
@@ -238,7 +240,7 @@ const selectedPeriodLabel = computed(() => {
   return periods.find(p => p.value === selectedPeriod.value)?.label || '';
 });
 
-// Helper to get reliable user ID
+// 信頼性の高いユーザーIDを取得するためのヘルパー
 const getValidUserId = async () => {
   const { data: { user: authUser } } = await client.auth.getUser();
   const id = authUser?.id || user.value?.id;
@@ -297,7 +299,7 @@ const fetchData = async () => {
       .select("*")
       .eq("user_id", userId)
       .order("date", { ascending: false })
-      .limit(500); // more for "all period"
+      .limit(500); // 全期間表示に対応するため多めに取得
     
     if (hError) console.error("History fetch error:", hError);
     
@@ -402,6 +404,7 @@ const periodHistory = computed(() => {
   return history.value.filter(h => new Date(h.date) >= cutoff).reverse();
 });
 
+// グラフ用データの整形
 const chartData = computed(() => {
   return {
     labels: periodHistory.value.map(h => {

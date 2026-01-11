@@ -61,6 +61,8 @@ const client = useSupabaseClient<Database>();
 const user = useSupabaseUser();
 const workouts = ref<Database["public"]["Tables"]["workouts"]["Row"][]>([]);
 
+const { getTodayJST } = useDate();
+
 const fetchWorkouts = async () => {
   if (!user.value) return;
   const { data, error } = await client
@@ -86,7 +88,7 @@ const createWorkout = async () => {
     return;
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayJST();
 
   // Check existing
   const { data: existing } = await client
@@ -98,7 +100,7 @@ const createWorkout = async () => {
 
   if (existing) {
     if (confirm("本日のトレーニングは既に作成されています。開きますか？")) {
-      navigateTo(`/workouts/${existing.id}`);
+      navigateTo(`/workouts/${(existing as any).id}`);
     }
     return;
   }
@@ -115,7 +117,7 @@ const createWorkout = async () => {
   if (error) {
     alert("作成に失敗しました: " + error.message);
   } else if (data) {
-    navigateTo(`/workouts/${data.id}`);
+    navigateTo(`/workouts/${(data as any).id}`);
   }
 };
 

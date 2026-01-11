@@ -12,15 +12,16 @@
         <input type="hidden" name="remember" value="true" />
         <div class="rounded-md shadow-sm -space-y-px">
           <div>
-            <label for="gym-id" class="sr-only">ジムID</label>
+            <label for="email-address" class="sr-only">メールアドレス</label>
             <input
-              id="gym-id"
-              name="gym-id"
-              type="text"
+              id="email-address"
+              name="email"
+              type="email"
+              autocomplete="email"
               required
               class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="ジムID"
-              v-model="gymId"
+              placeholder="メールアドレス"
+              v-model="email"
             />
           </div>
           <div>
@@ -90,7 +91,7 @@
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 
-const gymId = ref("");
+const email = ref("");
 const password = ref("");
 const isSignUp = ref(false);
 const loading = ref(false);
@@ -102,13 +103,10 @@ const handleAuth = async () => {
   errorMsg.value = null;
   successMsg.value = null;
 
-  // Convert ID to Email format for Supabase
-  const fakeEmail = `${gymId.value}@gem-gym.internal`;
-
   try {
     if (isSignUp.value) {
       const { error } = await supabase.auth.signUp({
-        email: fakeEmail,
+        email: email.value,
         password: password.value,
       });
       if (error) throw error;
@@ -116,7 +114,7 @@ const handleAuth = async () => {
       // Since confirmation is disabled, we might be logged in already or need to sign in
       // Let's try to sign in immediately to ensure session is created if signUp didn't do it
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: fakeEmail,
+        email: email.value,
         password: password.value,
       });
       if (signInError) throw signInError;
@@ -124,7 +122,7 @@ const handleAuth = async () => {
       navigateTo("/");
     } else {
       const { error } = await supabase.auth.signInWithPassword({
-        email: fakeEmail,
+        email: email.value,
         password: password.value,
       });
       if (error) throw error;

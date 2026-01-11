@@ -207,7 +207,7 @@ const inlineCreateCategory = ref<string | null>(null);
 const inlineCreateName = ref("");
 const inlineInput = ref<HTMLInputElement[] | null>(null);
 
-const categoryOrder = ["胸", "背中", "肩", "腕", "脚", "その他"];
+const categoryOrder = ["胸", "背中", "腹", "肩", "腕", "脚", "その他"];
 
 const exercisesByGroup = computed(() => {
   const groups: Record<string, Database["public"]["Tables"]["exercises"]["Row"][]> = {};

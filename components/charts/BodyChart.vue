@@ -68,7 +68,7 @@ const initChart = () => {
     });
   }
 
-  // Calculate weight axis range
+  // 体重軸の表示範囲を計算
   const allWeights = props.targetWeight ? [...props.weightData, props.targetWeight] : props.weightData;
   const filteredWeights = allWeights.filter(w => w > 0);
   let yWeightMin, yWeightMax;
@@ -76,7 +76,7 @@ const initChart = () => {
   if (filteredWeights.length > 0) {
     const minW = Math.min(...filteredWeights);
     const maxW = Math.max(...filteredWeights);
-    const padding = Math.max((maxW - minW) * 0.2, 5); // At least 5kg padding or 20% of range
+    const padding = Math.max((maxW - minW) * 0.2, 5); // 少なくとも5kg、または範囲の20%の余白を持たせる
     yWeightMin = Math.floor(minW - padding);
     yWeightMax = Math.ceil(maxW + padding);
   }

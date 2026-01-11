@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <!-- Header with Period Selector -->
+    <!-- ヘッダーと期間選択 -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
         <h2 class="text-2xl font-black text-indigo-900 tracking-tight">分析</h2>
@@ -9,7 +9,7 @@
         </p>
       </div>
       
-      <!-- Period Selector -->
+      <!-- 期間選択ボタン -->
       <div class="inline-flex p-1 bg-gray-100 rounded-xl">
         <button 
           v-for="p in periods" 
@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <!-- Overview Stats -->
+    <!-- 概要統計 -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">合計トレーニング回数</p>
@@ -39,7 +39,7 @@
       </div>
     </div>
 
-    <!-- Volume Chart (Stacked Muscle Groups) -->
+    <!-- ボリューム推移グラフ（部位別積み上げ） -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
       <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6">ボリュームの推移（部位別）</h3>
       <div class="h-64">
@@ -54,7 +54,7 @@
       </div>
     </div>
 
-    <!-- Muscle Group Distribution (Pie chart-like Progress) -->
+    <!-- 部位別ボリューム比率（プログレスバー形式） -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
       <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6">期間内ボリューム比率</h3>
       <div class="space-y-4">
@@ -124,7 +124,7 @@ const stats = ref({
   totalWorkouts: 0,
 });
 
-// Filtered and processed data based on selectedPeriod
+// 選択された期間に基づいてフィルタリング・加工されたデータ
 const periodWorkouts = computed(() => {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - selectedPeriod.value);
@@ -181,7 +181,7 @@ const volumeLabels = computed(() => {
   const labels = [];
   const today = new Date();
   
-  // 1 week or 1 month: Daily
+  // 1週間または1ヶ月：日単位
   if (selectedPeriod.value <= 30) {
     for (let i = selectedPeriod.value - 1; i >= 0; i--) {
       const d = new Date(today);
@@ -192,7 +192,7 @@ const volumeLabels = computed(() => {
       }));
     }
   } 
-  // 3 months or 6 months: Weekly (approx)
+  // 3ヶ月または6ヶ月：週単位（およそ）
   else {
     const weeks = Math.ceil(selectedPeriod.value / 7);
     for (let i = weeks - 1; i >= 0; i--) {
@@ -222,7 +222,7 @@ const volumeDatasets = computed(() => {
       });
     } else {
       // Find the closest "week-start" label
-      // To simplify, we'll find how many weeks ago this workout was
+      // 簡略化のため、このワークアウトが何週間前だったかを計算
       const today = new Date();
       const diffTime = Math.abs(today.getTime() - wDate.getTime());
       const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));

@@ -91,20 +91,15 @@ const nextMonth = () => {
   date.value = new Date(currentYear.value, currentMonth.value + 1, 1);
 };
 
+const { getTodayJST, formatToJSTDate } = useDate();
+
 const isToday = (day: number) => {
-  const today = new Date();
-  return (
-    today.getDate() === day &&
-    today.getMonth() === currentMonth.value &&
-    today.getFullYear() === currentYear.value
-  );
+  return getDateStr(day) === getTodayJST();
 };
 
 const getDateStr = (day: number) => {
   const d = new Date(currentYear.value, currentMonth.value, day);
-  const offset = d.getTimezoneOffset();
-  const adjustedDate = new Date(d.getTime() - offset * 60 * 1000);
-  return adjustedDate.toISOString().split('T')[0];
+  return formatToJSTDate(d);
 };
 
 const hasWorkout = (day: number) => {

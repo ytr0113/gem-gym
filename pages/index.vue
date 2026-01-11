@@ -87,6 +87,8 @@ const weeklyMessage = computed(() => {
   return { text: 'パーフェクト！', color: 'bg-yellow-50 text-yellow-600' };
 });
 
+const { getTodayJST } = useDate();
+
 const fetchStats = async () => {
   if (!user.value) return;
 
@@ -94,7 +96,7 @@ const fetchStats = async () => {
   const today = new Date();
   const sevenDaysAgo = new Date(today);
   sevenDaysAgo.setDate(today.getDate() - 6);
-  const chartDateStr = sevenDaysAgo.toISOString().split("T")[0];
+  const chartDateStr = sevenDaysAgo.toISOString().split("T")[0]; // Chart range might still use UTC-ish but let's be careful. Actually for consistency let's just fix the "today" trigger.
 
   // Get date 60 days ago for calendar (buffer for month switching)
   const sixtyDaysAgo = new Date(today);
@@ -221,7 +223,7 @@ const createWorkout = async (targetDate?: string) => {
     return;
   }
 
-  const date = targetDate || new Date().toISOString().split("T")[0];
+  const date = targetDate || getTodayJST();
 
   // Check existing (extra safety)
   const { data: existing } = await client
