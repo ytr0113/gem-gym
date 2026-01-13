@@ -198,6 +198,12 @@ const fetchStats = async () => {
   }
 };
 
+watch(user, (newUser) => {
+  if (newUser?.id && newUser.id !== 'undefined') {
+    fetchStats();
+  }
+}, { immediate: true });
+
 onMounted(() => {
   fetchStats();
 });

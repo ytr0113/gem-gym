@@ -268,6 +268,12 @@ const fetchMuscleStats = async () => {
   recentRecords.value = records.reverse().slice(0, 10);
 };
 
+watch(user, (newUser) => {
+  if (newUser?.id && newUser.id !== 'undefined') {
+    fetchMuscleStats();
+  }
+}, { immediate: true });
+
 onMounted(() => {
   fetchMuscleStats();
 });

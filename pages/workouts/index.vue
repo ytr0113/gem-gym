@@ -149,6 +149,12 @@ const formatDate = (dateString: string, brief = false) => {
   });
 };
 
+watch(user, (newUser) => {
+  if (newUser?.id && newUser.id !== 'undefined') {
+    fetchWorkouts();
+  }
+}, { immediate: true });
+
 onMounted(() => {
   fetchWorkouts();
 });

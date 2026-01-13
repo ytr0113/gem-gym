@@ -242,15 +242,26 @@ const editingSetId = ref<string | null>(null);
 const editingSetData = ref<{ weight: number; reps: number; rpe: number | null; }>({ weight: 0, reps: 0, rpe: null });
 
 const fetchWorkoutData = async () => {
-  if (!user.value?.id || user.value.id === "undefined") return;
+  if (!user.value?.id || user.value.id === "undefined") {
+    loading.value = false;
+    return;
+  }
   loading.value = true;
   try {
+    const { data: { user: authUser } } = await client.auth.getUser();
+    const currentUserId = authUser?.id || user.value?.id;
+
+    if (!currentUserId || currentUserId === "undefined") {
+      loading.value = false;
+      return;
+    }
+
     // ワークアウトを取得
     const { data: wData, error: wError } = await client
       .from("workouts")
       .select("*")
       .eq("id", workoutId)
-      .eq("user_id", user.value.id)
+      .eq("user_id", currentUserId)
       .single();
     if (wError) throw wError;
     workout.value = wData;
@@ -298,8 +309,13 @@ const fetchWorkoutData = async () => {
       });
     }
   } catch (e: any) {
-    console.error(e);
-    alert("データ取得エラー: " + e.message);
+    console.error("Workout fetch error details:", e);
+    // ワークアウトが見つからない場合はメッセージを表示（alertは邪魔なのでコンソールのみ）
+    if (e.code === 'PGRST116') {
+      workout.value = null;
+    } else {
+      alert("データ取得エラー: " + e.message);
+    }
   } finally {
     loading.value = false;
   }
@@ -443,6 +459,12 @@ const formatDate = (dateString: string) => {
     weekday: "short",
   });
 };
+
+watch(user, (newUser) => {
+  if (newUser?.id && newUser.id !== 'undefined') {
+    fetchWorkoutData();
+  }
+}, { immediate: true });
 
 onMounted(() => {
   fetchWorkoutData();

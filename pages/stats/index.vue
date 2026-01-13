@@ -291,6 +291,12 @@ const fetchAllData = async () => {
   stats.value.totalWorkouts = rawWorkouts.value.length;
 };
 
+watch(user, (newUser) => {
+  if (newUser?.id && newUser.id !== 'undefined') {
+    fetchAllData();
+  }
+}, { immediate: true });
+
 onMounted(() => {
   fetchAllData();
 });
