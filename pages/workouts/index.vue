@@ -44,10 +44,19 @@
           </div>
         </li>
         <li
-          v-if="workouts.length === 0"
-          class="px-4 py-4 sm:px-6 text-center text-gray-500"
+          v-if="!loading && workouts.length === 0"
+          class="px-4 py-8 sm:px-6 text-center"
         >
-          履歴がまだありません。
+          <div class="flex flex-col items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-200 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <p class="text-gray-400 font-bold">履歴がまだありません</p>
+          </div>
+        </li>
+        <li v-if="loading" class="px-4 py-12 text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent"></div>
+          <p class="mt-2 text-xs font-bold text-indigo-400">履歴を読み込み中...</p>
         </li>
       </ul>
     </div>
@@ -60,21 +69,34 @@ import type { Database } from "~/types/database";
 const client = useSupabaseClient<Database>();
 const user = useSupabaseUser();
 const workouts = ref<Database["public"]["Tables"]["workouts"]["Row"][]>([]);
+const loading = ref(true);
 
 const { getTodayJST } = useDate();
 
 const fetchWorkouts = async () => {
-  if (!user.value?.id || user.value.id === "undefined") return;
-  const { data, error } = await client
-    .from("workouts")
-    .select("*")
-    .eq("user_id", user.value.id)
-    .order("date", { ascending: false });
+  const { data: { session } } = await client.auth.getSession();
+  const currentUserId = session?.user?.id || user.value?.id;
 
-  if (error) {
-    console.error("Error fetching workouts:", error);
-  } else {
-    workouts.value = data || [];
+  if (!currentUserId || currentUserId === "undefined") {
+    console.log("[History] Waiting for valid user ID...");
+    return;
+  }
+
+  loading.value = true;
+  try {
+    const { data, error } = await client
+      .from("workouts")
+      .select("*")
+      .eq("user_id", currentUserId)
+      .order("date", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching workouts:", error);
+    } else {
+      workouts.value = data || [];
+    }
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -149,11 +171,18 @@ const formatDate = (dateString: string, brief = false) => {
   });
 };
 
-watch(user, (newUser) => {
-  if (newUser?.id && newUser.id !== 'undefined') {
+watch(() => user.value?.id, (newId) => {
+  if (newId && newId !== 'undefined') {
     fetchWorkouts();
   }
 }, { immediate: true });
+
+// Auth状態の変化も監視
+client.auth.onAuthStateChange((event, session) => {
+  if (session?.user?.id) {
+    fetchWorkouts();
+  }
+});
 
 onMounted(() => {
   fetchWorkouts();

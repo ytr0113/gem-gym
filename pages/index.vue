@@ -77,6 +77,7 @@ const client = useSupabaseClient<Database>();
 const user = useSupabaseUser();
 
 const weeklyCount = ref(0);
+const loading = ref(true);
 const volumeLabels = ref<string[]>([]);
 const volumeDatasets = ref<{ label: string; data: number[]; backgroundColor: string }[]>([]);
 const workoutsByDate = ref<Record<string, string>>({});
@@ -90,18 +91,25 @@ const weeklyMessage = computed(() => {
 const { getTodayJST } = useDate();
 
 const fetchStats = async () => {
-  if (!user.value?.id || user.value.id === "undefined") return;
+  const { data: { session } } = await client.auth.getSession();
+  const currentUserId = session?.user?.id || user.value?.id;
 
+  if (!currentUserId || currentUserId === "undefined") {
+    console.log("[Dashboard] Waiting for valid user ID...");
+    return;
+  }
+  
+  loading.value = true;
   // Get date 7 days ago for chart
   const today = new Date();
-  const sevenDaysAgo = new Date(today);
-  sevenDaysAgo.setDate(today.getDate() - 6);
-  const chartDateStr = sevenDaysAgo.toISOString().split("T")[0]; // Chart range might still use UTC-ish but let's be careful. Actually for consistency let's just fix the "today" trigger.
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(today.getDate() - 7);
 
   // Get date 60 days ago for calendar (buffer for month switching)
   const sixtyDaysAgo = new Date(today);
   sixtyDaysAgo.setDate(today.getDate() - 60);
   const calendarDateStr = sixtyDaysAgo.toISOString().split("T")[0];
+  const chartDateStr = sevenDaysAgo.toISOString().split("T")[0];
 
   try {
     const { data: workouts, error } = await client
@@ -123,7 +131,7 @@ const fetchStats = async () => {
       )
       .gte("date", calendarDateStr)
       .order("date", { ascending: true })
-      .eq("user_id", user.value.id);
+      .eq("user_id", currentUserId);
 
     if (error) throw error;
 
@@ -195,14 +203,23 @@ const fetchStats = async () => {
     }));
   } catch (e) {
     console.error("Stats error:", e);
+  } finally {
+    loading.value = false;
   }
 };
 
-watch(user, (newUser) => {
-  if (newUser?.id && newUser.id !== 'undefined') {
+watch(() => user.value?.id, (newId) => {
+  if (newId && newId !== 'undefined') {
     fetchStats();
   }
 }, { immediate: true });
+
+// Auth状態の変化も監視
+client.auth.onAuthStateChange((event, session) => {
+  if (session?.user?.id) {
+    fetchStats();
+  }
+});
 
 onMounted(() => {
   fetchStats();
@@ -241,6 +258,7 @@ const createWorkout = async (targetDate?: string) => {
     .single();
 
   if (existing) {
+    console.log("[Dashboard] Existing workout found, navigating to:", existing.id);
     if (confirm(`${date} のトレーニングは既に作成されています。再開しますか？`)) {
       navigateTo(`/workouts/${existing.id}`);
     }
@@ -259,6 +277,7 @@ const createWorkout = async (targetDate?: string) => {
   if (error) {
     alert("作成に失敗しました: " + error.message);
   } else if (data) {
+    console.log("[Dashboard] Created new workout, navigating to:", data.id);
     navigateTo(`/workouts/${data.id}`);
   }
 };

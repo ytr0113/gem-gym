@@ -122,8 +122,13 @@ const displayName = computed(() => {
 
 const fetchProfile = async () => {
   try {
-    const { data: { user: authUser } } = await client.auth.getUser();
-    const userId = authUser?.id;
+    const { data: { session } } = await client.auth.getSession();
+    let userId = session?.user?.id || user.value?.id;
+    
+    if (!userId || userId === 'undefined') {
+      const { data: { user: authUser } } = await client.auth.getUser();
+      userId = authUser?.id;
+    }
     
     if (!userId || userId === 'undefined') {
       nicknameState.value = null;
@@ -140,12 +145,12 @@ const fetchProfile = async () => {
     
     if (data && (data as any).nickname) {
       nicknameState.value = (data as any).nickname;
-      console.log("Header sync successful! Nickname:", nicknameState.value);
+      console.log("[Header] Sync successful! Nickname:", nicknameState.value);
     } else {
       nicknameState.value = ""; // 明示的に「取得済みだがニックネームなし」とする
     }
   } catch (err) {
-    console.error("Failed to fetch profile for header:", err);
+    console.error("[Header] Failed to fetch profile:", err);
   }
 };
 
@@ -158,13 +163,18 @@ watch(() => user.value?.id, (newId) => {
   }
 }, { immediate: true });
 
-// プロフィール情報が更新された際（他のページから戻った時など）の同期力を高めるため
-// ルート変更時にも軽くチェック
+// Auth状態の変化も監視（ログイン直後などに対応）
+client.auth.onAuthStateChange((event, session) => {
+  if (session?.user?.id) {
+    fetchProfile();
+  } else if (event === 'SIGNED_OUT') {
+    nicknameState.value = null;
+  }
+});
+
 watch(() => route.path, () => {
   if (user.value?.id && user.value.id !== 'undefined') {
     fetchProfile();
-  } else {
-    nicknameState.value = null;
   }
 });
 

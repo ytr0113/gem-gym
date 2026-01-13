@@ -261,8 +261,16 @@ const formatVolume = (val: number) => {
   return Math.round(val).toLocaleString();
 };
 
+const loading = ref(true);
 const fetchAllData = async () => {
-  if (!user.value?.id || user.value.id === "undefined") return;
+  const { data: { session } } = await client.auth.getSession();
+  const currentUserId = session?.user?.id || user.value?.id;
+
+  if (!currentUserId || currentUserId === "undefined") {
+    console.log("[Stats] Waiting for user ID...");
+    return;
+  }
+  loading.value = true;
 
   const { data: workouts, error } = await client
     .from("workouts")
@@ -279,7 +287,7 @@ const fetchAllData = async () => {
         )
       )
     `)
-    .eq("user_id", user.value.id)
+    .eq("user_id", currentUserId)
     .order("date", { ascending: true });
 
   if (error) {
@@ -289,13 +297,21 @@ const fetchAllData = async () => {
 
   rawWorkouts.value = workouts || [];
   stats.value.totalWorkouts = rawWorkouts.value.length;
+  loading.value = false;
 };
 
-watch(user, (newUser) => {
-  if (newUser?.id && newUser.id !== 'undefined') {
+watch(() => user.value?.id, (newId) => {
+  if (newId && newId !== 'undefined') {
     fetchAllData();
   }
 }, { immediate: true });
+
+// Auth状態の変化も監視
+client.auth.onAuthStateChange((event, session) => {
+  if (session?.user?.id) {
+    fetchAllData();
+  }
+});
 
 onMounted(() => {
   fetchAllData();

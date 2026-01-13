@@ -242,20 +242,47 @@ const editingSetId = ref<string | null>(null);
 const editingSetData = ref<{ weight: number; reps: number; rpe: number | null; }>({ weight: 0, reps: 0, rpe: null });
 
 const fetchWorkoutData = async () => {
-  if (!user.value?.id || user.value.id === "undefined") {
+  const ts = new Date().toLocaleTimeString();
+  
+  // URLパラメータのチェック
+  if (!workoutId) {
+    console.error(`[${ts}] [WorkoutDetail] No workoutId in route!`);
     loading.value = false;
     return;
   }
+
+  console.log(`[${ts}] [WorkoutDetail] Starting fetch for ID:`, workoutId);
+
+  // Supabaseのユーザー取得を徹底的に試行
+  let currentUserId = user.value?.id;
+  
+  if (!currentUserId || currentUserId === "undefined") {
+    const { data: { session } } = await client.auth.getSession();
+    currentUserId = session?.user?.id;
+  }
+  
+  if (!currentUserId || currentUserId === "undefined") {
+    const { data: { user: authUser } } = await client.auth.getUser();
+    currentUserId = authUser?.id;
+  }
+
+  console.log(`[${ts}] [WorkoutDetail] ID check result - user.value: ${user.value?.id}, finalId: ${currentUserId}`);
+
+  if (!currentUserId || currentUserId === "undefined") {
+    console.log(`[${ts}] [WorkoutDetail] Still no valid ID. Waiting for session...`);
+    // 5秒経ってもダメなら諦める
+    setTimeout(() => {
+      if (loading.value && (!user.value?.id || user.value.id === 'undefined')) {
+        console.log(`[${ts}] [WorkoutDetail] Timeout: User ID never appeared.`);
+        loading.value = false;
+      }
+    }, 5000);
+    return;
+  }
+
   loading.value = true;
   try {
-    const { data: { user: authUser } } = await client.auth.getUser();
-    const currentUserId = authUser?.id || user.value?.id;
-
-    if (!currentUserId || currentUserId === "undefined") {
-      loading.value = false;
-      return;
-    }
-
+    console.log(`[${ts}] [WorkoutDetail] Executing query for workout: ${workoutId} with user: ${currentUserId}`);
     // ワークアウトを取得
     const { data: wData, error: wError } = await client
       .from("workouts")
@@ -460,11 +487,22 @@ const formatDate = (dateString: string) => {
   });
 };
 
-watch(user, (newUser) => {
-  if (newUser?.id && newUser.id !== 'undefined') {
+watch(() => user.value?.id, (newId) => {
+  const ts = new Date().toLocaleTimeString();
+  console.log(`[${ts}] [WorkoutDetail] Watcher fired! New ID:`, newId);
+  if (newId && newId !== 'undefined') {
     fetchWorkoutData();
   }
 }, { immediate: true });
+
+// Auth状態の変化を直接監視する（念押し）
+client.auth.onAuthStateChange((event, session) => {
+  const ts = new Date().toLocaleTimeString();
+  console.log(`[${ts}] [WorkoutDetail] Auth event:`, event, "User ID:", session?.user?.id);
+  if (session?.user?.id && loading.value) {
+    fetchWorkoutData();
+  }
+});
 
 onMounted(() => {
   fetchWorkoutData();

@@ -119,6 +119,7 @@ const MUSCLE_COLORS: Record<string, string> = {
 };
 
 const rawWorkouts = ref<any[]>([]);
+const loading = ref(true);
 const prs = ref<{ name: string; weight: number; date: string }[]>([]);
 const recentRecords = ref<{ date: string; exerciseName: string; maxWeight: number; oneRm: number }[]>([]);
 
@@ -184,7 +185,19 @@ const setsDatasets = computed(() => {
 });
 
 const fetchMuscleStats = async () => {
-  if (!user.value?.id || user.value.id === "undefined") return;
+  const { data: { session } } = await client.auth.getSession();
+  let currentUserId = session?.user?.id || user.value?.id;
+
+  if (!currentUserId || currentUserId === "undefined") {
+    const { data: { user: authUser } } = await client.auth.getUser();
+    currentUserId = authUser?.id;
+  }
+
+  if (!currentUserId || currentUserId === "undefined") {
+    console.log("[MuscleStats] Waiting for user ID...");
+    return;
+  }
+  loading.value = true;
 
   const { data: workouts, error } = await client
     .from("workouts")
@@ -202,11 +215,12 @@ const fetchMuscleStats = async () => {
         )
       )
     `)
-    .eq("user_id", user.value.id)
+    .eq("user_id", currentUserId)
     .order("date", { ascending: true });
 
   if (error) {
     console.error(error);
+    loading.value = false;
     return;
   }
 
@@ -266,13 +280,21 @@ const fetchMuscleStats = async () => {
   })).sort((a, b) => b.weight - a.weight);
 
   recentRecords.value = records.reverse().slice(0, 10);
+  loading.value = false;
 };
 
-watch(user, (newUser) => {
-  if (newUser?.id && newUser.id !== 'undefined') {
+watch(() => user.value?.id, (newId) => {
+  if (newId && newId !== 'undefined') {
     fetchMuscleStats();
   }
 }, { immediate: true });
+
+// Auth状態の変化も監視
+client.auth.onAuthStateChange((event, session) => {
+  if (session?.user?.id) {
+    fetchMuscleStats();
+  }
+});
 
 onMounted(() => {
   fetchMuscleStats();
