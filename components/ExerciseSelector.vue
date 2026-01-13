@@ -246,17 +246,20 @@ const toggleCategory = (cat: string, forceOpen = false) => {
 
 const fetchExercises = async () => {
   try {
-    const { data: { session } } = await client.auth.getSession();
-    const currentUserId = session?.user?.id || null;
-
-    console.log("[ExerciseSelector] Fetching... UserID:", currentUserId);
+    const {
+      data: { user: currentUser },
+    } = await client.auth.getUser();
 
     let query = client.from("exercises").select("*");
 
-    if (currentUserId) {
-        query = query.or(`user_id.eq.${currentUserId},user_id.eq.00000000-0000-0000-0000-000000000000`);
+    if (!currentUser) {
+      console.log("[ExerciseSelector] No user, skip custom exercise fetch");
+      query = query.eq("user_id", "00000000-0000-0000-0000-000000000000");
     } else {
-        query = query.eq("user_id", "00000000-0000-0000-0000-000000000000");
+      console.log("[ExerciseSelector] Fetching... UserID:", currentUser.id);
+      query = query.or(
+        `user_id.eq.${currentUser.id},user_id.eq.00000000-0000-0000-0000-000000000000`
+      );
     }
 
     const { data, error } = await query.order("name");
