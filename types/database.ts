@@ -139,18 +139,27 @@ export interface Database {
       user_profiles: {
         Row: {
           user_id: string
+          nickname: string | null
+          birthday: string | null
+          gender: string | null
           target_weight: number | null
           target_body_fat: number | null
           updated_at: string
         }
         Insert: {
           user_id: string
+          nickname?: string | null
+          birthday?: string | null
+          gender?: string | null
           target_weight?: number | null
           target_body_fat?: number | null
           updated_at?: string
         }
         Update: {
           user_id?: string
+          nickname?: string | null
+          birthday?: string | null
+          gender?: string | null
           target_weight?: number | null
           target_body_fat?: number | null
           updated_at?: string

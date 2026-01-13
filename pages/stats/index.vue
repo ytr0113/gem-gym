@@ -279,6 +279,7 @@ const fetchAllData = async () => {
         )
       )
     `)
+    .eq("user_id", user.value.id)
     .order("date", { ascending: true });
 
   if (error) {

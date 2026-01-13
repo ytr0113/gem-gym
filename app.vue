@@ -151,13 +151,21 @@ const fetchProfile = async () => {
 
 // ユーザー変更時やページ読み込み時にプロフィール取得
 watch(() => user.value?.id, (newId) => {
-  if (newId) fetchProfile();
+  if (newId) {
+    fetchProfile();
+  } else {
+    nicknameState.value = null;
+  }
 }, { immediate: true });
 
 // プロフィール情報が更新された際（他のページから戻った時など）の同期力を高めるため
 // ルート変更時にも軽くチェック
 watch(() => route.path, () => {
-  if (user.value) fetchProfile();
+  if (user.value) {
+    fetchProfile();
+  } else {
+    nicknameState.value = null;
+  }
 });
 
 const isUserMenuOpen = ref(false);
@@ -191,6 +199,7 @@ const isActive = (path: string) => {
 const handleLogout = async () => {
   isUserMenuOpen.value = false;
   await client.auth.signOut();
+  nicknameState.value = null;
   navigateTo('/login');
 };
 </script>

@@ -122,7 +122,8 @@ const fetchStats = async () => {
       `
       )
       .gte("date", calendarDateStr)
-      .order("date", { ascending: true });
+      .order("date", { ascending: true })
+      .eq("user_id", user.value.id);
 
     if (error) throw error;
 

@@ -242,6 +242,7 @@ const editingSetId = ref<string | null>(null);
 const editingSetData = ref<{ weight: number; reps: number; rpe: number | null; }>({ weight: 0, reps: 0, rpe: null });
 
 const fetchWorkoutData = async () => {
+  if (!user.value) return;
   loading.value = true;
   try {
     // ワークアウトを取得
@@ -249,6 +250,7 @@ const fetchWorkoutData = async () => {
       .from("workouts")
       .select("*")
       .eq("id", workoutId)
+      .eq("user_id", user.value.id)
       .single();
     if (wError) throw wError;
     workout.value = wData;

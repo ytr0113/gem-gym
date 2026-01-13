@@ -68,6 +68,7 @@ const fetchWorkouts = async () => {
   const { data, error } = await client
     .from("workouts")
     .select("*")
+    .eq("user_id", user.value.id)
     .order("date", { ascending: false });
 
   if (error) {
