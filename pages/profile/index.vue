@@ -227,7 +227,7 @@ const fetchProfile = async () => {
     const userId = authUser?.id;
     
     if (!userId || userId === 'undefined') {
-      console.warn("Fetch attempted without valid userId");
+      console.warn("Fetch attempted without valid userId (value: " + userId + ")");
       loading.value = false;
       return;
     }
@@ -274,6 +274,7 @@ const saveProfile = async () => {
     const userId = authUser?.id;
 
     if (!userId || userId === 'undefined') {
+      console.error("Save attempted without valid userId (value: " + userId + ")");
       alert("ユーザー情報の取得に失敗しました。再ログインしてください。");
       return;
     }

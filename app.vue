@@ -151,7 +151,7 @@ const fetchProfile = async () => {
 
 // ユーザー変更時やページ読み込み時にプロフィール取得
 watch(() => user.value?.id, (newId) => {
-  if (newId) {
+  if (newId && newId !== 'undefined') {
     fetchProfile();
   } else {
     nicknameState.value = null;
@@ -161,7 +161,7 @@ watch(() => user.value?.id, (newId) => {
 // プロフィール情報が更新された際（他のページから戻った時など）の同期力を高めるため
 // ルート変更時にも軽くチェック
 watch(() => route.path, () => {
-  if (user.value) {
+  if (user.value?.id && user.value.id !== 'undefined') {
     fetchProfile();
   } else {
     nicknameState.value = null;

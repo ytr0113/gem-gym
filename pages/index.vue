@@ -90,7 +90,7 @@ const weeklyMessage = computed(() => {
 const { getTodayJST } = useDate();
 
 const fetchStats = async () => {
-  if (!user.value) return;
+  if (!user.value?.id || user.value.id === "undefined") return;
 
   // Get date 7 days ago for chart
   const today = new Date();
@@ -219,7 +219,7 @@ const createWorkout = async (targetDate?: string) => {
     error: authError,
   } = await client.auth.getUser();
 
-  if (authError || !currentUser) {
+  if (authError || !currentUser?.id || currentUser.id === "undefined") {
     alert("ログインセッションが無効です。再ログインしてください。");
     return;
   }

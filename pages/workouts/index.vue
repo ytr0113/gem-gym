@@ -64,7 +64,7 @@ const workouts = ref<Database["public"]["Tables"]["workouts"]["Row"][]>([]);
 const { getTodayJST } = useDate();
 
 const fetchWorkouts = async () => {
-  if (!user.value) return;
+  if (!user.value?.id || user.value.id === "undefined") return;
   const { data, error } = await client
     .from("workouts")
     .select("*")
@@ -84,7 +84,7 @@ const createWorkout = async () => {
     error: authError,
   } = await client.auth.getUser();
 
-  if (authError || !currentUser) {
+  if (authError || !currentUser?.id || currentUser.id === "undefined") {
     alert("ログインセッションが無効です。");
     return;
   }

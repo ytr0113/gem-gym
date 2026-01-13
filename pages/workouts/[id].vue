@@ -242,7 +242,7 @@ const editingSetId = ref<string | null>(null);
 const editingSetData = ref<{ weight: number; reps: number; rpe: number | null; }>({ weight: 0, reps: 0, rpe: null });
 
 const fetchWorkoutData = async () => {
-  if (!user.value) return;
+  if (!user.value?.id || user.value.id === "undefined") return;
   loading.value = true;
   try {
     // ワークアウトを取得

@@ -262,7 +262,7 @@ const formatVolume = (val: number) => {
 };
 
 const fetchAllData = async () => {
-  if (!user.value) return;
+  if (!user.value?.id || user.value.id === "undefined") return;
 
   const { data: workouts, error } = await client
     .from("workouts")

@@ -252,11 +252,11 @@ const fetchExercises = async () => {
 
     let query = client.from("exercises").select("*");
 
-    if (!currentUser) {
-      console.log("[ExerciseSelector] No user, skip custom exercise fetch");
+    if (!currentUser || !currentUser.id || currentUser.id === "undefined") {
+      console.log("[ExerciseSelector] No valid user, fetch system exercises only");
       query = query.eq("user_id", "00000000-0000-0000-0000-000000000000");
     } else {
-      console.log("[ExerciseSelector] Fetching... UserID:", currentUser.id);
+      console.log("[ExerciseSelector] Fetching for UserID:", currentUser.id);
       query = query.or(
         `user_id.eq.${currentUser.id},user_id.eq.00000000-0000-0000-0000-000000000000`
       );
